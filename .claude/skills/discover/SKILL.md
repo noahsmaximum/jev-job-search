@@ -29,6 +29,9 @@ Options:
 To include the user's own tracking sheet, they export it as CSV into
 `data/imports/` first; every file there is read on the next discover.
 
+A search other than the student one finds more through `/indeed`: run it
+first when the queue is thin.
+
 If it fails with an OPENROUTER_API_KEY error or a missing profile, run
 `npx jev doctor` and follow its next step, or use `/setup`. If a source fails, the run continues without it and says so
 on stderr.

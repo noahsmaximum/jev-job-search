@@ -102,12 +102,13 @@ A Greenhouse, Lever or Ashby link is read from the board, rated, and filled like
 
 ## Other commands
 
-`/setup`, `/discover` and `/apply` are the workflow. Eleven more skills extend it once your profile is in place. Each is typed in Claude Code as written; none needs a terminal:
+`/setup`, `/discover` and `/apply` are the workflow. Twelve more skills extend it once your profile is in place. Each is typed in Claude Code as written; none needs a terminal:
 
 - **`/tailor <job id> [--cover]`** writes a one-page resume for the job from your profile and the posting, and with `--cover` a one-page cover letter, and shows you the PDFs. Every number and every name of a tool, a place or a company in the draft is checked against your profile in code; the keywords the posting wants and your profile cannot support are listed, never stuffed in. `/apply --tailor --cover` writes and attaches them as it applies. See [A resume and a cover letter written for the job](#a-resume-and-a-cover-letter-written-for-the-job).
 - **`/report`** opens the dashboard on your own machine, the main screen once you are set up. **Today** is the day in one line. **Needs you** lists everything only you can do: a question a form asked that your profile could not answer, with a box and "Save for next run"; a form waiting for a code or a sign-in, with "Show the form"; a submission that was never confirmed. **Applications** is every job with its status, your notes and the reply that came back. **Automation** is the daily run as a switch, a time and your rules. Nothing leaves your machine.
 - **`/inbox`** (in progress) reads your connected Gmail, read-only, for replies to applications you sent: received, rejected, an assessment, an interview, an offer. It looks at the sender, the subject and Gmail's own short preview, never the body. What it is not sure of waits for you under "Needs you".
 - **`/expand`** reads the public places your profile already links to (your GitHub repositories, your portfolio site) and proposes projects, skills and facts that are missing from the profile, each with its source. Nothing is added without your yes.
+- **`/indeed`** searches Indeed for the titles in your profile's `search` section, through the Indeed connector in Claude Code, and looks each posting up on the company's own board, where the tool can apply. What it cannot find there is listed for you with the link. See [docs/SEARCH.md](docs/SEARCH.md).
 - **`/add-source`** adds a job board or a public list as a source: it inspects the site, writes the source in the shape of the shipped ones, tests it on a captured sample and runs one live query before registering it.
 - **`/accounts`** (in progress) lets the tool apply on Workday, where every employer wants its own account. The simple way: `/accounts signin <employer>` opens that employer's page, you sign in once yourself, and the tool keeps the session. Storing a password, and letting the tool make accounts for you (experimental), are there when you want them. Off until you turn it on. See [Jobs that want an account](#jobs-that-want-an-account).
 - **`/daily`** is the daily run: a few applications a day with nobody watching, inside a standing policy you write (how many, where, which employers never) and limits meant to look like one careful person: 15 a day, one per employer, minutes between two applications to one board, a full stop when boards start asking for a human check. `/daily dry` rehearses it, `/daily run` runs today's, and `/daily schedule 09:00` makes it run by itself; nothing is scheduled until you type that. `/daily pause` removes the schedule, and `/daily stop` asks a run that is working to stop after the application it is on. See [docs/DAILY.md](docs/DAILY.md).
@@ -122,6 +123,7 @@ Every skill runs a command you can also type yourself, as `npx jev <command>` fr
 | Skill | The same in a terminal |
 |---|---|
 | `/discover` | `npx jev discover` |
+| `/indeed` | `npx jev leads` (after Claude Code has written the leads file) |
 | `/apply`, `/apply <link>` | `npx jev apply --count 10 --submit`, `npx jev apply <link> --submit` |
 | `/tailor <job id>` | `npx jev tailor <job id> --cover` |
 | `/report` | `npx jev report --open` |
@@ -145,6 +147,7 @@ jev-job-search/
 │   ├── tailor/                # /tailor: a resume and a cover letter per job
 │   ├── report/                # /report: the dashboard
 │   ├── expand/                # /expand: enrich the profile from your public links
+│   ├── indeed/                # /indeed: leads from Indeed, looked up on company boards
 │   ├── add-source/            # /add-source: a new job board or list
 │   ├── accounts/              # /accounts: boards that want an account (Workday)
 │   ├── daily/                 # /daily: the daily run and its schedule

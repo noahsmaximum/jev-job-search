@@ -5,7 +5,7 @@ Read `README.md` first, then `docs/ARCHITECTURE.md`. The CLI is the product:
 `src/run/pipeline.ts` is the loop itself. The skills in `.claude/skills/`
 run it with a person in the loop: `/setup`, `/discover`, `/apply`,
 `/accounts`, `/daily`, `/resume`, `/status`, `/inbox`, `/report`,
-`/profile`. A person using
+`/profile`, `/indeed`. A person using
 the tool types those and never `npx`: when you add a command, add the
 slash form to a skill and lead the docs with it.
 

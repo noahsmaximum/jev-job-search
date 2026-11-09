@@ -55,11 +55,33 @@ not read them. It reads:
   postings whose title names design work
 - the boards you add under `search.boards`
 - any CSV in `data/imports/` with Company and Job Link columns
+- `/indeed`, which searches Indeed for your titles and looks each
+  posting up on the company's own board
 - `/apply <url>` for one posting you found yourself
 
 The seed list is a start. Most of what it finds will come from the
-boards you add for the companies you care about. Aggregators such as
-Indeed and LinkedIn are not read: export what you find there to a CSV.
+boards you add for the companies you care about, and from `/indeed`.
+
+## Leads from Indeed
+
+`/indeed` needs the Indeed connector in Claude Code. Claude searches
+Indeed for each title in `search.titles`, remote and near
+`location.home`, and writes what it finds to
+`data/imports/indeed.leads.json`. The tool cannot apply on Indeed, which
+needs a sign-in. It looks for each posting on the company's own
+Greenhouse, Lever or Ashby board instead, trying the company's name as
+the board name and keeping a board only when it lists the same title.
+
+A posting found that way is rated and filled like any other, and the
+board is polled on every later `/discover`. The rest are listed for you
+with their Indeed link (`npx jev leads` prints the list again). Expect
+most small studios to land on that list: only companies on those three
+systems can be found.
+
+Any file named `*.leads.json` in `data/imports/` is read the same way,
+so leads from anywhere else can be written by hand: an array of
+`{ "company", "title", "location", "postedAt", "pay", "link", "source" }`,
+where only `company` and `title` are required.
 
 ## What changes in the rating
 

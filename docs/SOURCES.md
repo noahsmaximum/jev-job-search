@@ -45,11 +45,25 @@ with that employer, so these jobs are kept only once the person has
 allowed accounts ([ACCOUNTS.md](ACCOUNTS.md)). In one run 876 of the
 postings found were on Workday, across 290 employers.
 
+## Leads
+
+Indeed is not read by the tool and is never applied through: that needs
+a sign-in. `/indeed` has Claude Code search it with the Indeed connector
+and write the postings to `data/imports/indeed.leads.json`. A lead is a
+company and a title. `src/sources/leads.ts` looks for the same posting
+on the company's own Greenhouse, Lever or Ashby board: it tries the
+company's name as the board name (`slugCandidates`) and keeps a board
+only when it lists the lead's title (`sameTitle`), because a guessed
+name can belong to another company. A posting found becomes a job from
+that board, and the board is polled with the rest. A lead not found is
+left for the person, with its link. What each lookup learned is kept in
+`data/cache/lead-boards.json`; the limits are `LEADS` in `src/config.ts`.
+
 ## Deliberately not read yet
 
 | Source | Why not yet | How it would be added |
 |---|---|---|
-| LinkedIn Jobs, Indeed, Glassdoor | They need a sign-in or block automated reading. The tool does not sign in anywhere | Not planned |
+| LinkedIn Jobs, Glassdoor | They need a sign-in or block automated reading. The tool does not sign in anywhere | Not planned. A posting found there can be written to a leads file (below) |
 | iCIMS, Taleo, Oracle, SuccessFactors, Amazon Jobs | Every one needs an account | An adapter in `src/accounts/`, like the one for Workday. Until then these jobs are skipped |
 | SmartRecruiters | Its form is drawn inside components the page scripts cannot read yet | Reading through shadow roots in `dumpFields.js` and `fillFields.js` |
 | German-language boards | English only for version one | A `lang` field on `Job` and a German `voice.md` |
