@@ -69,6 +69,8 @@ important choices:
 - `preferences.salaryExpectation`: leave empty to never volunteer a number.
 - `facts`: the only claims Claude may make in a written answer. Keep every
   number exact.
+- `search`: leave it out for software internships and new-grad roles.
+  For anything else (design is built in), see `docs/SEARCH.md`.
 - `summary`: three or four sentences; this is the candidate side of every
   fit rating, so say what you want, where, and when.
 

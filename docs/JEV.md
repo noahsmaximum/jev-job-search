@@ -139,6 +139,21 @@ State: `{ job: { company, title, locations, posted_days_ago, terms_from_source, 
 | `needs_account` | noul | Trusted only when the ATS is unknown to code and the value is above 0.9. |
 | `requires_references` | noul | Skip above 0.85; the user does not supply references. |
 
+A profile with a `search` section (`docs/SEARCH.md`) changes the set.
+Outside the student search `term`, `graduation_excluded` and
+`returning_student_required` are not asked, and `level` is one of
+internship, new_grad, mid, senior, lead, other: a level the profile does
+not want, with confidence at or above 0.6, is a skip. A role other than
+software replaces `is_software_role`:
+
+| Key | Type | Why |
+|---|---|---|
+| `is_target_role` | noul | Hard skip below 0.5. The criteria name the titles the profile asks for. |
+| `employment_type` | choice: full_time, part_time, contract, internship, unclear | Asked when `search.employment` is set. A kind not wanted, with confidence at or above 0.6, is a skip. |
+| `pay_stated` | noul | Asked when `search.minSalary` is set. Below 0.3 adds "pay not stated" to the reasons. |
+| `pay_below_floor` | noul | Skip above 0.7. False when no pay is stated, so silence never skips a job. |
+| `work_place` | choice: remote, home, elsewhere, unclear | Asked when `search.location` is set. Replaces the built-in order of places; when unsure, the location line decides. |
+
 Composite: weights in `FIT_WEIGHTS`, multiplied by a location tier factor
 and a recency factor (1.0 today, 0.7 at fourteen days). Hard rules are
 skips, not low scores, so the threshold only trims weak matches.

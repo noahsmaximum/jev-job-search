@@ -111,6 +111,15 @@ it answered. Write the answer in the user's words.
 14. Do you have a transcript to attach when a form requires one? If so,
     its path goes in `transcript.path`. If not, such forms are left for you.
 15. Anything you never want the tool to say or to answer for you.
+16. What are you looking for? If it is software internships or new-grad
+    roles, write no `search` section. Otherwise ask for the titles, the
+    levels, full time or contract, a pay floor if they have one, where
+    they would work on site and how far from it, and whether a role that
+    is neither remote nor near home should be skipped. Write the answers
+    to `search` as `docs/SEARCH.md` describes. Ask which companies they
+    want watched and add each one's board to `search.boards`. For design
+    work, ask for a portfolio link (`links.portfolio`) and a portfolio
+    PDF (`portfolio.path`), and skip question 8.
 
 Two choices are fixed in this version, so tell the user and do not ask:
 the tool never writes a cover letter and never gives references. It skips

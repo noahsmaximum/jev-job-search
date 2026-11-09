@@ -18,6 +18,11 @@ posting found by three lists is rated once.
 | Ashby boards | `api.ashbyhq.com/posting-api/job-board/{slug}` | Live | Same. Includes `descriptionPlain`. |
 | Your tracking sheet | CSV files in `data/imports/` with at least Company and Job Link columns | When you export it | Rows already marked applied are ignored. |
 
+The table is the student software search. A profile whose `search`
+section asks for other work (`docs/SEARCH.md`) skips the GitHub lists and
+polls that role's seed boards and the boards the profile names, keeping
+the postings whose title names the role.
+
 Board polling matters because the lists lag by a day or two and the user
 wants the freshest postings. On one run, boards contributed about 2,000
 early-career postings on top of the lists, of which a few hundred were
