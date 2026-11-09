@@ -32,6 +32,7 @@ import { boardsFromJobs, type Board } from "./sources/companies.js";
 import { fetchReadmeSources } from "./sources/githubReadme.js";
 import { fetchSimplify } from "./sources/simplify.js";
 import { importSheet } from "./sources/sheetImport.js";
+import { readLeads, resolveLeads } from "./sources/leads.js";
 import { mapLimit } from "./util/http.js";
 
 export const EARLY_CAREER_TITLE = /\b(intern|internship|co-?op|new grad|new graduate|early career|early-career|entry[- ]level|junior|graduate|university|student|campus|associate software|software engineer i\b|engineer i\b|swe i\b)\b/i;
@@ -100,8 +101,18 @@ export async function collectJobs(opts: DiscoverOptions = {}): Promise<Job[]> {
     }
   }
 
+  // Leads from a site the tool cannot apply through are looked up on the company's own board.
+  const leadBoards: Board[] = [];
+  const leads = readLeads(PATHS.imports, log);
+  if (leads.length && opts.boards !== false) {
+    const found = await resolveLeads(leads, { known: target.boards });
+    jobs.push(...found.jobs);
+    leadBoards.push(...found.boards);
+    log(`[sources] leads: ${found.jobs.length} found on ${found.boards.length} company boards, ${found.unresolved.length} left for you (npx jev leads lists them)`);
+  }
+
   if (opts.boards !== false) {
-    const boards = boardsFromJobs(jobs, target.boards);
+    const boards = boardsFromJobs(jobs, [...target.boards, ...leadBoards]);
     log(`[sources] polling ${boards.length} company boards`);
     const results = await mapLimit(boards, DISCOVER.fetchConcurrency, (b: Board) =>
       b.ats === "greenhouse" ? fetchGreenhouseBoard(b.slug, b.company)

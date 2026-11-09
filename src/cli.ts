@@ -47,6 +47,8 @@ import { loadProfile } from "./profile/schema.js";
 import { setDocumentPolicy, tailorJob } from "./documents/tailor.js";
 import { activeTemplate, addTemplate, listTemplates, useTemplate } from "./documents/templates.js";
 import { addJob, looksLikeUrl } from "./jobs/addJob.js";
+import { targetOf } from "./jobs/target.js";
+import { formatUnresolved, readLeads, resolveLeads } from "./sources/leads.js";
 import { buildReport } from "./report/data.js";
 import { reportPage } from "./report/page.js";
 import { startReportServer } from "./report/server.js";
@@ -83,6 +85,19 @@ program
     console.log(`${summary.queued} queued (score ≥ ${DISCOVER.applyThreshold}), ${summary.belowThreshold} below threshold, ${summary.skippedByJev} skipped by JEV.`);
     console.log(`JEV: ${summary.jevCalls} calls, $${summary.jevCostUsd.toFixed(4)}.\n`);
     printTable(top);
+  });
+
+program
+  .command("leads")
+  .description("Look up the leads in data/imports/*.leads.json on company boards, and list the ones left for you")
+  .option("--json")
+  .action(async (o: { json?: boolean }) => {
+    const leads = readLeads();
+    const found = await resolveLeads(leads, { known: targetOf(loadProfile()).boards });
+    if (o.json) return console.log(JSON.stringify(found, null, 2));
+    console.log(`${leads.length} leads. ${found.jobs.length} found on ${found.boards.length} company boards: the next discover rates them.`);
+    for (const j of found.jobs) console.log(`  ${j.company}: ${j.title}\n    ${j.url}`);
+    if (found.unresolved.length) console.log(`\n${found.unresolved.length} not on a board the tool reads. These are yours to apply to:\n${formatUnresolved(found.unresolved)}`);
   });
 
 program

@@ -68,6 +68,8 @@ export const PATHS = {
   jevUsage: path.join(ROOT, "data", "runs", "jev-usage.jsonl"),
   writerUsage: path.join(ROOT, "data", "runs", "writer-usage.jsonl"),
   imports: path.join(ROOT, "data", "imports"),
+  /** What looking up leads has learned: the company board behind a company name, or that none was found. */
+  leadBoards: path.join(ROOT, "data", "cache", "lead-boards.json"),
   /** Tailored resumes and cover letters, one folder per job: documents/tailored/<Company>_<Role>_<job id>/. */
   documents: path.join(ROOT, "documents", "tailored"),
   /** The person's own files, at the top of the project: the resume to send, a transcript, and the tailored pairs under tailored/. */
@@ -106,6 +108,18 @@ export const JEV = {
   retryBaseMs: 500,
   /** Hard stop for one discover run, in USD. The model page lists $0.042 per million input tokens. */
   runSpendCapUsd: 1.0,
+} as const;
+
+/** Leads: postings seen on a site the tool cannot apply through, looked up on the company's own board. */
+export const LEADS = {
+  /** The boards a company name is tried on, in this order. */
+  ats: ["greenhouse", "lever", "ashby"] as const,
+  /** How many spellings of a company name are tried as a board name. */
+  maxSlugs: 4,
+  /** Companies looked up at once. */
+  concurrency: 4,
+  /** A company with no board found is not looked up again for this many days. */
+  retryDays: 7,
 } as const;
 
 export const DISCOVER = {
