@@ -6,11 +6,11 @@
 [![release](https://img.shields.io/github/v/release/qbeka/jev-job-search?label=release)](https://github.com/qbeka/jev-job-search/releases)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-An open-source job application tool built on [Claude Code](https://claude.com/claude-code). It finds software internships and new-grad roles, fills the application forms in a Chrome window you can watch, reads every answer back from the page, and sends the ones you approve.
+An open-source job application tool built on [Claude Code](https://claude.com/claude-code). It finds the roles you are looking for (software internships and new-grad roles unless your profile says otherwise; design work is built in), fills the application forms in a Chrome window you can watch, reads every answer back from the page, and sends the ones you approve.
 
 | | |
 |---|---|
-| **Who it is for** | Students and new graduates applying to software roles in Canada, the United States or remotely, who are comfortable opening a terminal once. It writes in English. |
+| **Who it is for** | Students and new graduates applying to software roles in Canada, the United States or remotely, and, with a `search` section in the profile, anyone looking for other work such as graphic design at any level. You should be comfortable opening a terminal once. It writes in English. |
 | **What you need** | A Mac with Google Chrome, [Node.js](https://nodejs.org) 22, and [Claude Code](https://claude.com/claude-code) with a Claude Pro or Max subscription. |
 | **What it costs** | Your Claude subscription, plus a few dollars of [OpenRouter](https://openrouter.ai/keys) credit for JEV: about 1 to 1.5 cents per 10 applications. Nothing else. |
 | **How to start** | Clone it, run `npm install`, open `claude` in the folder and type `/setup`. About 20 minutes, most of it your answers. It ends with one application filled and waiting for your yes. |
@@ -99,6 +99,28 @@ Fills the best queued forms, one Chrome tab each, answers what JEV left open wit
 ```
 
 A Greenhouse, Lever or Ashby link is read from the board, rated, and filled like any other. A Workday link needs `/accounts`, which is [in progress](#jobs-that-want-an-account). For another board, `/discover` picks it up when it appears on the public lists.
+
+## Looking for something other than software internships
+
+With nothing said, the search is the one the tool began with: software internships and new-grad roles. A `search` section in `data/profile.json` changes what it looks for. `/setup` asks what you are looking for and writes it; `/profile` changes it later.
+
+```json
+"search": {
+  "role": "design",
+  "titles": ["Graphic Designer", "Visual Designer", "Brand Designer"],
+  "levels": ["mid", "senior"],
+  "employment": ["full_time"],
+  "minSalary": 60000,
+  "location": { "home": ["Springfield, IL"], "radiusMiles": 30, "elsewhere": "skip" }
+}
+```
+
+- **What changes.** The title filter, the questions JEV rates a posting on (level, kind of employment, a pay floor, remote or near home), and where jobs come from. Filling, checking and sending are the same for any role.
+- **Where the jobs come from.** The GitHub lists hold software internships only, so another search reads a seed list of company boards for that kind of work, the boards you name under `search.boards`, and `/indeed`.
+- **`/indeed`.** Claude Code searches Indeed for your titles through the Indeed connector. The tool never applies on Indeed: it looks each posting up on the company's own Greenhouse, Lever or Ashby board and applies there. What it cannot find is listed for you with the link.
+- **A portfolio.** `links.portfolio` answers a form that asks for a site, and `portfolio.path` is the file for a box that asks for a portfolio. That box is never given the resume.
+
+Design is the one kind of work built in besides software. [docs/SEARCH.md](docs/SEARCH.md) has every field and how to add another kind.
 
 ## Other commands
 
@@ -259,7 +281,7 @@ Everything about you is in data files, not in the code. `/profile` changes any o
 
 ### Where the jobs come from, and adding a board
 
-Jobs come from public lists on GitHub (the SimplifyJobs internship and new-grad lists among them) and from the company boards those lists point at, read through the boards' own APIs for Greenhouse, Lever and Ashby. Workday postings are read from Workday's own posting data and are kept once you allow accounts with `/accounts`; until then they are filtered out. iCIMS, Taleo, Oracle and the other boards that want an account are filtered out, and a site found behind a sign-in during a run is remembered and skipped. [docs/SOURCES.md](docs/SOURCES.md) describes each source and how to add one, and `data/imports/` takes a CSV of your own.
+For the student software search, jobs come from public lists on GitHub (the SimplifyJobs internship and new-grad lists among them) and from the company boards those lists point at, read through the boards' own APIs for Greenhouse, Lever and Ashby. Workday postings are read from Workday's own posting data and are kept once you allow accounts with `/accounts`; until then they are filtered out. iCIMS, Taleo, Oracle and the other boards that want an account are filtered out, and a site found behind a sign-in during a run is remembered and skipped. [docs/SOURCES.md](docs/SOURCES.md) describes each source and how to add one, and `data/imports/` takes a CSV of your own. Another search reads other places: see [Looking for something other than software internships](#looking-for-something-other-than-software-internships).
 
 ### Jobs that want an account
 
@@ -279,7 +301,7 @@ A robot check, a phone code, a passkey and single sign-on stop the job with the 
 
 ### Which jobs it keeps
 
-The filters and the scoring are in `src/config.ts`: early-career titles only, the countries you may work in, how much a Vancouver, Canadian, remote or US posting is worth to you, and how old a posting may be (`/discover --max-age 30`). A posting that prefers another graduation date is ranked lower, not dropped: whether to apply is your decision.
+What the search is for is the `search` section of your profile ([docs/SEARCH.md](docs/SEARCH.md)). The filters and the scoring for the student search are in `src/config.ts`: early-career titles only, the countries you may work in, how much a Vancouver, Canadian, remote or US posting is worth to you, and how old a posting may be (`/discover --max-age 30`). A posting that prefers another graduation date is ranked lower, not dropped: whether to apply is your decision.
 
 ### Custom resume and cover letter templates
 
