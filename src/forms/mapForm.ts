@@ -416,12 +416,13 @@ async function mapFormFresh(jev: JevClient, profile: Profile, job: Job, dump: Fi
       want === "resume" ? (policy.resume && docs ? docs.resume : profile.resume.path)
       : want === "cover" ? (policy.cover && docs?.cover ? docs.cover : null)
       : want === "transcript" || (want === "graduate_transcript" && graduate) ? (profile.transcript?.path ?? null)
+      : want === "portfolio" ? (profile.portfolio?.path ?? null)
       : null;
     planned.push({
       id: f.id, selector: f.selector, kind: f.kind, label: f.label, required: f.required,
       action: file ? "upload" : "skip", key: want === "resume" ? "resume_upload" : "leave_blank",
       value: file, optionLabel: null, confidence: 1,
-      note: file ? (want === "resume" && file !== profile.resume.path ? "the resume written for this job" : want === "cover" ? "the cover letter written for this job" : null) : want === "autofill" ? "autofill helper, skipped so it does not overwrite the plan" : want === "transcript" ? "asks for a transcript. Set transcript.path in your profile to attach one" : want === "graduate_transcript" ? "asks for a graduate transcript, and the profile has no graduate degree" : want === "cover" ? "asks for a cover letter. Run apply --cover to write one" : "not a resume upload",
+      note: file ? (want === "resume" && file !== profile.resume.path ? "the resume written for this job" : want === "cover" ? "the cover letter written for this job" : null) : want === "autofill" ? "autofill helper, skipped so it does not overwrite the plan" : want === "transcript" ? "asks for a transcript. Set transcript.path in your profile to attach one" : want === "graduate_transcript" ? "asks for a graduate transcript, and the profile has no graduate degree" : want === "cover" ? "asks for a cover letter. Run apply --cover to write one" : want === "portfolio" ? "asks for a portfolio. Set portfolio.path in your profile to attach one" : "not a resume upload",
     });
   });
   const ordered = dump.fields.map((f) => planned.find((p) => p.id === f.id) as PlannedField);
@@ -565,12 +566,14 @@ export function planField(f: DumpedField, answer: Answer | undefined, profile: P
 /** A box that asks for a cover letter, as a file or as text. */
 export const COVER_LABEL = /cover\s*letter|covering letter|letter of (motivation|interest|application)|motivation letter/i;
 
-export function fileBoxWants(f: Pick<DumpedField, "label" | "name" | "hint" | "selector">): "resume" | "cover" | "transcript" | "graduate_transcript" | "autofill" | "other" | "unnamed" {
+export function fileBoxWants(f: Pick<DumpedField, "label" | "name" | "hint" | "selector">): "resume" | "cover" | "transcript" | "graduate_transcript" | "portfolio" | "autofill" | "other" | "unnamed" {
   const text = `${f.label} ${f.name} ${f.hint} ${f.selector}`;
   if (/autofill|auto-fill|parse|prefill/i.test(text)) return "autofill";
   if (COVER_LABEL.test(text)) return "cover";
   if (/transcript/i.test(text)) return /\b(graduate|master|phd|doctoral)\b/i.test(text) && !/undergraduate/i.test(text) ? "graduate_transcript" : "transcript";
   if (/resume|résumé|\bcv\b|curriculum/i.test(text)) return "resume";
+  // A box for a portfolio alone. One that also names another document ("portfolio or other files") stays "other".
+  if (/portfolio|work samples?|samples? of (your )?work/i.test(text) && !/cover|letter|photo|picture|certificate|writing sample|reference|other|additional/i.test(text)) return "portfolio";
   if (/cover|letter|portfolio|photo|picture|certificate|writing sample|work sample|reference|other|additional/i.test(text)) return "other";
   return "unnamed";
 }

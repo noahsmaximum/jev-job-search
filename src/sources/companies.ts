@@ -94,6 +94,48 @@ export const SEED_BOARDS: Board[] = [
   { ats: "ashby", slug: "lightspeedhq", company: "Lightspeed" },
 ];
 
+/**
+ * Boards polled when the search is for design work: agencies, studios and in-house brand teams
+ * that had design openings on a public board when this list was made. Add your own under
+ * `search.boards` in the profile.
+ */
+export const DESIGN_SEED_BOARDS: Board[] = [
+  { ats: "greenhouse", slug: "monks", company: "Monks" },
+  { ats: "greenhouse", slug: "landor", company: "Landor" },
+  { ats: "greenhouse", slug: "ogilvy", company: "Ogilvy" },
+  { ats: "greenhouse", slug: "vaynermedia", company: "VaynerMedia" },
+  { ats: "greenhouse", slug: "akqa", company: "AKQA" },
+  { ats: "greenhouse", slug: "rga", company: "R/GA" },
+  { ats: "greenhouse", slug: "ideo", company: "IDEO" },
+  { ats: "lever", slug: "instrument", company: "Instrument" },
+  { ats: "lever", slug: "wpromote", company: "Wpromote" },
+  { ats: "greenhouse", slug: "riotgames", company: "Riot Games" },
+  { ats: "greenhouse", slug: "scopely", company: "Scopely" },
+  { ats: "greenhouse", slug: "epicgames", company: "Epic Games" },
+  { ats: "greenhouse", slug: "roblox", company: "Roblox" },
+  { ats: "greenhouse", slug: "twitch", company: "Twitch" },
+  { ats: "greenhouse", slug: "reddit", company: "Reddit" },
+  { ats: "greenhouse", slug: "discord", company: "Discord" },
+  { ats: "greenhouse", slug: "pinterest", company: "Pinterest" },
+  { ats: "greenhouse", slug: "duolingo", company: "Duolingo" },
+  { ats: "greenhouse", slug: "figma", company: "Figma" },
+  { ats: "greenhouse", slug: "airbnb", company: "Airbnb" },
+  { ats: "greenhouse", slug: "instacart", company: "Instacart" },
+  { ats: "greenhouse", slug: "doordashusa", company: "DoorDash" },
+  { ats: "greenhouse", slug: "voxmedia", company: "Vox Media" },
+  { ats: "greenhouse", slug: "glossier", company: "Glossier" },
+  { ats: "greenhouse", slug: "bombas", company: "Bombas" },
+  { ats: "greenhouse", slug: "oura", company: "Oura" },
+  { ats: "greenhouse", slug: "brex", company: "Brex" },
+  { ats: "greenhouse", slug: "robinhood", company: "Robinhood" },
+  { ats: "lever", slug: "spotify", company: "Spotify" },
+  { ats: "ashby", slug: "whoop", company: "WHOOP" },
+  { ats: "ashby", slug: "ramp", company: "Ramp" },
+  { ats: "ashby", slug: "linear", company: "Linear" },
+  { ats: "ashby", slug: "elevenlabs", company: "ElevenLabs" },
+  { ats: "ashby", slug: "webflow", company: "Webflow" },
+];
+
 /** Every board the given jobs point at, merged with the seed list, deduped by ats+slug. */
 export function boardsFromJobs(jobs: Job[], seeds: Board[] = SEED_BOARDS): Board[] {
   const map = new Map<string, Board>();

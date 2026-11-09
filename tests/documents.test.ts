@@ -108,6 +108,7 @@ describe("a cover letter box", () => {
     const box = (label: string) => ({ label, name: "", hint: "", selector: "#x" });
     expect(fileBoxWants(box("Cover Letter (Attach)"))).toBe("cover");
     expect(fileBoxWants(box("Resume/CV"))).toBe("resume");
-    expect(fileBoxWants(box("Portfolio"))).toBe("other");
+    expect(fileBoxWants(box("Portfolio"))).toBe("portfolio");
+    expect(fileBoxWants(box("Portfolio or other documents"))).toBe("other");
   });
 });

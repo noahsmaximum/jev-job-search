@@ -120,8 +120,8 @@ export function valueFor(profile: Profile, key: ProfileKey): string | null {
       return `${profile.address.line1}, ${profile.address.city}, ${profile.address.regionCode} ${profile.address.postalCode}, ${profile.address.country}`;
     case "current_location": return `${profile.address.city}, ${profile.address.region}, ${profile.address.country}`;
     case "linkedin_url": return profile.links.linkedin;
-    case "github_url": return profile.links.github;
-    case "website_url": return profile.links.website ?? profile.links.portfolio ?? profile.links.github;
+    case "github_url": return profile.links.github ?? null;
+    case "website_url": return profile.links.website ?? profile.links.portfolio ?? profile.links.github ?? null;
     case "school": return edu.school;
     case "degree": return edu.degree;
     case "major": return edu.field;

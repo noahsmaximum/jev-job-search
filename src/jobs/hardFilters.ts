@@ -5,13 +5,8 @@
  */
 import { DISCOVER } from "../config.js";
 import { ageDays, type Job } from "./normalize.js";
+import { DEFAULT_TARGET, type Target } from "./target.js";
 import { isWalled } from "./walled.js";
-
-const NON_SOFTWARE_TITLE =
-  /\b(hardware|mechanical|electrical|civil|chemical|aerospace|manufacturing|industrial|process|structural|rf|asic|fpga|pcb|silicon|analog|mixed[- ]signal|product manager|program manager|project manager|technical program|product design|ux|ui designer|graphic|marketing|sales|recruit|finance intern|accounting|legal|hr |human resources|supply chain|operations analyst|business analyst|data scientist|data science|data analyst|quant|trading|research scientist|phd|postdoc|technician|physical|optics|photonics|materials|biomed|clinical|nurse|teacher)\b/i;
-
-/** A title that matches NON_SOFTWARE_TITLE is rescued when it also says one of these. */
-const SOFTWARE_TITLE = /software|developer|programm|full[- ]stack|backend|frontend|front[- ]end|back[- ]end|\bswe\b|web engineer|mobile engineer|platform engineer/i;
 
 const FRENCH_TITLE = /\b(stagiaire|développeur|developpeur|ingénieur|ingenieur|stage\b|alternance|poste)\b/i;
 
@@ -49,6 +44,8 @@ export function preFilter(
   maxAgeDays: number = DISCOVER.maxAgeDays,
   /** True for a job on an account board where the person has an account, or let the tool make one. */
   mayApplyWithAccount: (url: string) => boolean = () => false,
+  /** What the search is for: its title filter is the one applied here. */
+  target: Target = DEFAULT_TARGET,
 ): string | null {
   if (job.ats === "workday" && !mayApplyWithAccount(job.url)) return "workday (needs an account per company)";
   if (job.ats === "taleo" || job.ats === "oracle" || job.ats === "successfactors" || job.ats === "icims" || job.ats === "amazon") {
@@ -58,9 +55,8 @@ export function preFilter(
   if ((DISCOVER.unreadableAts as readonly string[]).includes(job.ats)) return `${job.ats} (its form cannot be read yet)`;
   const age = ageDays(job, now);
   if (age !== null && age > maxAgeDays) return `posted ${age} days ago`;
-  if (NON_SOFTWARE_TITLE.test(job.title) && !SOFTWARE_TITLE.test(job.title)) {
-    return "title is not a software role";
-  }
+  const title = target.titleReason(job.title);
+  if (title) return title;
   if (FRENCH_TITLE.test(job.title)) return "non-English posting";
   if (job.degrees.length && !job.degrees.some((d) => /bachelor|associate|bootcamp|certificate/i.test(d))) {
     return "advanced degree required";

@@ -12,6 +12,42 @@ const YesNo = z.enum(["yes", "no"]);
 /** A voluntary self-identification question may be declined. */
 const YesNoDecline = z.enum(["yes", "no", "decline"]);
 
+/**
+ * What to search for. Left out, the search is the one this tool began with: software internships
+ * and new-grad roles. Every field here steers which postings are found and how they rank. None of
+ * it is ever written into a form.
+ */
+export const SearchSchema = z
+  .object({
+    /** The kind of work. Each has its own title filter, sources and rating questions: see src/jobs/target.ts. */
+    role: z.enum(["software", "design"]).default("software"),
+    /** The job titles wanted, as a posting would word them ("Graphic Designer", "Motion Designer"). JEV reads them, and a board posting with one in its title is kept. */
+    titles: z.array(z.string()).default([]),
+    /** Words that rule a title out ("instructional", "UX"). */
+    excludeTitles: z.array(z.string()).default([]),
+    /** The levels wanted. Internship and new grad alone is the student search, with its term and graduation questions. */
+    levels: z.array(z.enum(["internship", "new_grad", "mid", "senior", "lead"])).min(1).default(["internship", "new_grad"]),
+    /** Kinds of employment wanted. Empty means any. */
+    employment: z.array(z.enum(["full_time", "part_time", "contract", "internship"])).default([]),
+    /** A yearly pay floor. A posting whose stated range tops out below it is skipped; one that states no pay is kept and says so. */
+    minSalary: z.number().positive().optional(),
+    /** Where the work may be. Left out, postings rank by the built-in order (Vancouver, Canada, remote, United States). */
+    location: z
+      .object({
+        /** The places that count as home ("Atlanta, GA"). On site or hybrid there ranks first. */
+        home: z.array(z.string()).min(1),
+        /** How far from home still counts, in miles. */
+        radiusMiles: z.number().positive().optional(),
+        /** A role that is neither remote nor at home: skip it, or keep it and rank it lower. */
+        elsewhere: z.enum(["skip", "rank_lower"]).default("rank_lower"),
+      })
+      .optional(),
+    /** More company boards to poll on every search, beside the ones the role comes with. */
+    boards: z.array(z.object({ ats: z.enum(["greenhouse", "lever", "ashby"]), slug: z.string().min(1), company: z.string().min(1) })).default([]),
+  })
+  .default({});
+export type Search = z.infer<typeof SearchSchema>;
+
 export const ProfileSchema = z.object({
   name: z.object({
     first: z.string().min(1),
@@ -38,7 +74,8 @@ export const ProfileSchema = z.object({
   }),
   links: z.object({
     linkedin: z.string().url(),
-    github: z.string().url(),
+    /** Optional: a designer or a writer may have none. A GitHub box is then left empty. */
+    github: z.string().url().optional(),
     website: z.string().url().optional(),
     portfolio: z.string().url().optional(),
   }),
@@ -136,6 +173,9 @@ export const ProfileSchema = z.object({
   }),
   /** An academic transcript, attached only to a file box that asks for one. Leave it out and such a form is held for you. */
   transcript: z.object({ path: z.string() }).optional(),
+  /** A portfolio or work-samples file (a PDF), attached only to a file box that asks for one. The link in links.portfolio goes in a URL box. */
+  portfolio: z.object({ path: z.string() }).optional(),
+  search: SearchSchema,
   /** Three or four sentences used as the candidate side of every JEV rating call. */
   summary: z.string().min(40),
   /** Short facts Claude may use when drafting free text. Nothing outside this list is claimed. */

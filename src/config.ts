@@ -171,6 +171,12 @@ export const LOCATION_MULTIPLIER = {
 } as const;
 
 /** Applied when the posting asks for a graduation date the candidate does not have. They can still apply, so it ranks lower instead of being dropped. */
+/**
+ * The same, for a profile that says where the work may be (`search.location`): at home, remote,
+ * neither, or not stated. "Neither" applies only when the profile keeps such roles.
+ */
+export const PLACE_MULTIPLIER = { home: 1.0, remote: 1.0, elsewhere: 0.5, unclear: 0.7 } as const;
+
 export const GRADUATION_MISMATCH_MULTIPLIER = 0.6;
 
 /** Recency multiplier: 1.0 for today, decaying linearly to this floor at maxAgeDays. */

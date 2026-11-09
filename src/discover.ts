@@ -10,6 +10,7 @@ import { JevClient } from "./jev/client.js";
 import { describe } from "./jobs/describe.js";
 import { capabilityFor } from "./accounts/capability.js";
 import { preFilter } from "./jobs/hardFilters.js";
+import { DEFAULT_TARGET, targetOf, type Target } from "./jobs/target.js";
 import { isWalled, learnedWalledHosts } from "./jobs/walled.js";
 import { dedupe, type Job } from "./jobs/normalize.js";
 import { entryFor, KEPT_ON_REDISCOVERY, loadQueue, mutateQueue, sortEntries, type QueueEntry, type QueueFile, type QueueStatus } from "./jobs/queue.js";
@@ -49,6 +50,8 @@ export type DiscoverOptions = {
   gradYear?: number;
   /** Consider postings up to this many days old, for one search. The default is DISCOVER.maxAgeDays. */
   maxAgeDays?: number;
+  /** What the search is for. Left out, software internships and new-grad roles. */
+  target?: Target;
 };
 
 export type DiscoverSummary = {
@@ -67,17 +70,23 @@ export type DiscoverSummary = {
 
 export async function collectJobs(opts: DiscoverOptions = {}): Promise<Job[]> {
   const log = opts.log ?? (() => {});
+  const target = opts.target ?? DEFAULT_TARGET;
   const jobs: Job[] = [];
 
-  const [simplify, readmes] = await Promise.all([
-    fetchSimplify().catch((e) => {
-      log(`[sources] simplify failed: ${String(e)}`);
-      return [] as Job[];
-    }),
-    fetchReadmeSources(),
-  ]);
-  log(`[sources] simplify ${simplify.length}, github lists ${readmes.length}`);
-  jobs.push(...simplify, ...readmes);
+  // The GitHub lists hold software internships and new-grad roles and nothing else.
+  if (target.onLists && target.earlyCareer) {
+    const [simplify, readmes] = await Promise.all([
+      fetchSimplify().catch((e) => {
+        log(`[sources] simplify failed: ${String(e)}`);
+        return [] as Job[];
+      }),
+      fetchReadmeSources(),
+    ]);
+    log(`[sources] simplify ${simplify.length}, github lists ${readmes.length}`);
+    jobs.push(...simplify, ...readmes);
+  } else {
+    log(`[sources] the GitHub lists are skipped: they carry software internships and new-grad roles only`);
+  }
 
   if (existsSync(PATHS.imports)) {
     for (const f of readdirSync(PATHS.imports).filter((f) => f.endsWith(".csv"))) {
@@ -92,7 +101,7 @@ export async function collectJobs(opts: DiscoverOptions = {}): Promise<Job[]> {
   }
 
   if (opts.boards !== false) {
-    const boards = boardsFromJobs(jobs);
+    const boards = boardsFromJobs(jobs, target.boards);
     log(`[sources] polling ${boards.length} company boards`);
     const results = await mapLimit(boards, DISCOVER.fetchConcurrency, (b: Board) =>
       b.ats === "greenhouse" ? fetchGreenhouseBoard(b.slug, b.company)
@@ -102,11 +111,12 @@ export async function collectJobs(opts: DiscoverOptions = {}): Promise<Job[]> {
     let fromBoards = 0;
     results.forEach((r) => {
       if (!r.ok) return;
-      const early = r.value.filter((j) => isEarlyCareerTitle(j.title, opts.gradYear));
-      fromBoards += early.length;
-      jobs.push(...early);
+      // A board lists every opening the company has. The student search takes the early-career ones; any other takes the ones whose title names the role.
+      const wanted = r.value.filter((j) => (target.earlyCareer ? isEarlyCareerTitle(j.title, opts.gradYear) : target.namesRole(j.title)));
+      fromBoards += wanted.length;
+      jobs.push(...wanted);
     });
-    log(`[sources] boards contributed ${fromBoards} early-career postings`);
+    log(`[sources] boards contributed ${fromBoards} ${target.earlyCareer ? "early-career" : target.noun} postings`);
   }
   return dedupe(jobs);
 }
@@ -173,7 +183,8 @@ export async function discover(profile: Profile, jev: JevClient, opts: DiscoverO
   const prevById = new Map(previous.entries.map((e) => [e.job.id, e]));
 
   const gradYear = profile.education[0]?.gradYear;
-  const all = await collectJobs({ ...opts, ...(gradYear !== undefined ? { gradYear } : {}) });
+  const target = opts.target ?? targetOf(profile);
+  const all = await collectJobs({ ...opts, target, ...(gradYear !== undefined ? { gradYear } : {}) });
   const learned = learnedWalledHosts();
   const us = usStatus(profile);
   const collected = all.length;
@@ -186,7 +197,7 @@ export async function discover(profile: Profile, jev: JevClient, opts: DiscoverO
   // An account board counts when the person has an account there or allowed one, even if today's limit of new accounts is used up.
   const withAccount = (url: string) => (capabilityFor(url)?.verdict ?? "no") !== "no";
   for (const job of all) {
-    const reason = preFilter(job, now, (url) => isWalled(url, learned), us, opts.maxAgeDays, withAccount);
+    const reason = preFilter(job, now, (url) => isWalled(url, learned), us, opts.maxAgeDays, withAccount, target);
     if (reason) decided.push({ job, fit: null, reason });
     else kept.push(job);
   }
